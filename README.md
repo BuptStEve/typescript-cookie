@@ -1,4 +1,4 @@
-# TypeScript Cookie [![CI Status](https://github.com/carhartl/typescript-cookie/actions/workflows/ci.yml/badge.svg)](https://github.com/carhartl/typescript-cookie/actions/workflows/ci.yml) [![TypeScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) [![Maintainability](https://api.codeclimate.com/v1/badges/d87f5ff1ca1041f8723a/maintainability)](https://codeclimate.com/github/carhartl/typescript-cookie/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/d87f5ff1ca1041f8723a/test_coverage)](https://codeclimate.com/github/carhartl/typescript-cookie/test_coverage) [![npm](https://img.shields.io/github/package-json/v/carhartl/typescript-cookie)](https://www.npmjs.com/package/typescript-cookie) [![size](https://img.shields.io/bundlephobia/minzip/typescript-cookie)](https://www.npmjs.com/package/typescript-cookie)
+# TypeScript Cookie [![CI Status](https://github.com/carhartl/typescript-cookie/actions/workflows/ci.yml/badge.svg)](https://github.com/carhartl/typescript-cookie/actions/workflows/ci.yml) [![Maintainability](https://api.codeclimate.com/v1/badges/d87f5ff1ca1041f8723a/maintainability)](https://codeclimate.com/github/carhartl/typescript-cookie/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/d87f5ff1ca1041f8723a/test_coverage)](https://codeclimate.com/github/carhartl/typescript-cookie/test_coverage) [![npm](https://img.shields.io/github/package-json/v/carhartl/typescript-cookie)](https://www.npmjs.com/package/typescript-cookie)
 
 A simple, lightweight TypeScript API for handling cookies.
 
@@ -17,8 +17,8 @@ A simple, lightweight TypeScript API for handling cookies.
 
 ### NPM
 
-```
-$ npm i typescript-cookie
+```bash
+npm i typescript-cookie
 ```
 
 ## Basic Usage
@@ -209,43 +209,21 @@ const write: Encoder<string> = (value) => value.toUpperCase()
 setCookie('uppercased', 'foo', undefined, write) // => 'uppercased=FOO; path=/'
 ```
 
-## js-cookie compatibility
-
-To ease migration while getting full TypeScript support there's a compat module that provides an api similar to [js-cookie](https://github.com/js-cookie/js-cookie):
-
-```typescript
-import { Cookies } from 'typescript-cookie'
-
-Cookies.get('name')
-```
-
 ## Testing
 
-```
-$ npm test
+```bash
+npm test
 ```
 
 Run tests continuously:
 
-```
-$ npm test -- --watch
+```bash
+npm test -- --watch
 ```
 
 ## Releasing
 
-We are using [release-it](https://www.npmjs.com/package/release-it) for automated releasing.
+Releasing should be done via the `Release` GitHub Actions workflow, so that published packages on npmjs.com have package provenance.
 
-Start a dry run to see what would happen:
-
-```
-$ npm run release minor -- --dry-run
-```
-
-Do a real release (publishes both to npm as well as create a new release on GitHub):
-
-```
-$ npm run release minor
-```
-
-_GitHub releases are created as a draft and need to be published manually!
-(This is so we are able to craft suitable release notes before publishing.)_
+GitHub releases are created as a draft and need to be published manually!
+(This is so we are able to craft suitable release notes before publishing.)

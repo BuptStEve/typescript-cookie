@@ -13,8 +13,10 @@ import {
   encodeValue as defaultValueEncoder
 } from './codec'
 
-function stringifyAttributes (
-  attributes: CookieAttributes & { expires?: any }
+type AsUnionFromInterface<T> = T[keyof T]
+
+function stringifyAttributes(
+  attributes: CookieAttributes | { expires: string }
 ): string {
   // Copy incoming attributes as to not alter the original object..
   attributes = Object.assign({}, attributes)
@@ -23,12 +25,16 @@ function stringifyAttributes (
     attributes.expires = new Date(Date.now() + attributes.expires * 864e5)
   }
   if (attributes.expires != null) {
-    attributes.expires = attributes.expires.toUTCString()
+    attributes.expires = (attributes.expires as Date).toUTCString()
   }
 
   return (
     Object.entries(attributes)
-      .filter(([key, value]: [string, any]) => value != null && value !== false)
+      .filter(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        ([key, value]: [string, AsUnionFromInterface<CookieAttributes>]) =>
+          value != null && value !== false
+      )
       // Considers RFC 6265 section 5.2:
       // ...
       // 3.  If the remaining unparsed-attributes contains a %x3B (";")
@@ -47,30 +53,32 @@ type GetReturn<T, R> = [T] extends [undefined]
   ? { [property: string]: R }
   : R | undefined
 
-function get<T extends string | undefined, U> (
+function get<T extends string | undefined, U>(
   name: T,
   decodeValue: Decoder<U>,
   decodeName: Decoder<string>
 ): GetReturn<T, U> {
   const scan = /(?:^|; )([^=]*)=([^;]*)/g
-  const jar: any = {}
+  const jar: { [property: string]: U } = {}
   let match
   while ((match = scan.exec(document.cookie)) != null) {
     try {
       const found = decodeName(match[1])
-      jar[found] = decodeValue(match[2], found)
+      if (!(found in jar)) jar[found] = decodeValue(match[2], found)
       if (name === found) {
         break
       }
-    } catch (e) {}
+    } catch (e) {
+      // Do nothing...
+    }
   }
 
-  return name != null ? jar[name] : jar
+  return (name != null ? jar[name] : jar) as GetReturn<T, U>
 }
 
 export const DEFAULT_CODEC: CookieCodecConfig<
-string | number | boolean | undefined | null,
-string
+  string | number | boolean | undefined | null,
+  string
 > = Object.freeze({
   decodeName: defaultNameDecoder,
   decodeValue: defaultValueDecoder,
@@ -99,20 +107,20 @@ export const DEFAULT_ATTRIBUTES: CookieAttributesConfig = Object.freeze({
 // setCookie('c', new Date(), undefined, { encodeValue: (v) => v.toISOString() }) // Ok!
 export function setCookie<
   T extends string | number | boolean | undefined | null
-> (name: string, value: T): string
+>(name: string, value: T): string
 
 export function setCookie<
   T extends string | number | boolean | undefined | null
-> (name: string, value: T, attributes: CookieAttributes): string
+>(name: string, value: T, attributes: CookieAttributes): string
 
-export function setCookie<T extends {}> (
+export function setCookie<T>(
   name: string,
   value: T,
   attributes: CookieAttributes | undefined,
   { encodeValue, encodeName }: CookieEncoding<T>
 ): string
 
-export function setCookie (
+export function setCookie(
   name: string,
   value: string | number | boolean | undefined | null,
   attributes: CookieAttributes = DEFAULT_ATTRIBUTES,
@@ -127,14 +135,14 @@ export function setCookie (
   )}${stringifyAttributes(attributes)}`)
 }
 
-export function getCookie (name: string): string | undefined
+export function getCookie(name: string): string | undefined
 
-export function getCookie<T extends {}> (
+export function getCookie<T>(
   name: string,
   { decodeValue, decodeName }: CookieDecoding<T>
 ): T | undefined
 
-export function getCookie (
+export function getCookie(
   name: string,
   {
     decodeValue = defaultValueDecoder,
@@ -144,27 +152,24 @@ export function getCookie (
   return get(name, decodeValue, decodeName)
 }
 
-export function getCookies (): {
+export function getCookies(): {
   [property: string]: string
 }
 
-export function getCookies<T extends {}> ({
-  decodeValue,
-  decodeName
-}: CookieDecoding<T>): {
+export function getCookies<T>({ decodeValue, decodeName }: CookieDecoding<T>): {
   [property: string]: T
 }
 
-export function getCookies ({
+export function getCookies({
   decodeValue = defaultValueDecoder,
   decodeName = defaultNameDecoder
 }: CookieDecoding<string> = {}): {
-    [property: string]: string
-  } {
+  [property: string]: string
+} {
   return get(undefined, decodeValue, decodeName)
 }
 
-export function removeCookie (
+export function removeCookie(
   name: string,
   attributes: CookieAttributes = DEFAULT_ATTRIBUTES
 ): void {
